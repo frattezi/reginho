@@ -1,0 +1,51 @@
+version: '3.3'
+
+services:
+
+  redis:
+    image: redis
+    container_name: redis
+    expose:
+      - 6379
+
+  subscriber:
+    image: reginho_subscriber
+    build:
+      context: ./subscriber/
+    deploy:
+      mode: replicated
+      replicas: 2
+    volumes:
+      - ./subscriber:/app/
+    depends_on:
+      - elasticsearch
+      - redis
+    environment:
+      - PYTHONUNBUFFERED=0
+
+  publisher:
+    image: reginho_publisher
+    build:
+      context: ./publisher/
+    deploy:
+      mode: replicated
+      replicas: 3
+    volumes:
+      - ./publisher:/app/
+    depends_on:
+      - redis
+    environment:
+      - PYTHONUNBUFFERED=0
+      - REDIS_CHANNELS=test_channel
+
+  elasticsearch:
+    image: elasticsearch:6.7.1
+    ports:
+     - "9200:9200"
+
+  kibana:
+    image: blacktop/kibana:6.7
+    ports:
+      - "5601:5601"
+    depends_on:
+      - elasticsearch

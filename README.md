@@ -1,2 +1,2 @@
-# reginho
-Python Pub/Sub
+# bench_redis_pubsub
+
